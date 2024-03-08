@@ -94,6 +94,15 @@ else:
                             st.write(cleaned_thoughts)
 
                 history.generate_messages(response_container)
+                # # Button for exporting assistant's replies to Word, focusing only on the assistant's messages
+                if st.button("Export Chat History to PDF"):
+                    try:
+                        assistant_msgs = st.session_state.get("assistant", [])
+                        layout.export_assistant_replies_to_pdf(assistant_msgs)
+                    except Exception as e:
+                        st.error(f"Failed to export: {str(e)}")
+
+
         except Exception as e:
             st.error(f"Error: {str(e)}")
 

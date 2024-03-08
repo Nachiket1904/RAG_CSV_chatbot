@@ -1,4 +1,7 @@
 import streamlit as st
+import fpdf
+from io import BytesIO
+
 
 class Layout:
     
@@ -26,6 +29,7 @@ class Layout:
             unsafe_allow_html=True,
         )
 
+    
     def prompt_form(self):
         """
         Displays the prompt form
@@ -42,3 +46,38 @@ class Layout:
             is_ready = submit_button and user_input
         return is_ready, user_input
     
+
+    def export_assistant_replies_to_pdf(self, assistant_msgs, filename="RecentAssistantReplies.pdf"):
+        """
+        Exports the most recent assistant message to a PDF document in memory
+        and allows direct download within the Streamlit app.
+        """
+
+        pdf = fpdf.FPDF()
+        try:
+            # Attempt to embed DejaVuSans font (if available)
+            pdf.add_font('DejaVuSans', '', 'DejaVuSans.ttf', uni=True)
+            pdf.set_font("DejaVuSans", size=12)
+        except OSError:
+            # Handle font not found error
+            st.error("DejaVuSans.ttf font not found. Using Helvetica (may not support emojis).")
+            pdf.set_font("helvetica", size=12)
+
+        pdf.add_page()
+        pdf.cell(0, 10, ln=2)
+
+        # Get the most recent assistant message (assuming assistant_msgs is a list)
+        recent_msg = assistant_msgs[-1]  # Access the last element
+
+        pdf.write(5, recent_msg)
+
+        # Create a BytesIO object to store the PDF in memory
+        pdf_output = BytesIO()
+        pdf.output(pdf_output)
+
+        # Download the PDF directly within Streamlit
+        st.download_button(label="Download Recent Assistant Reply",
+                          data=pdf_output.getvalue(),
+                          file_name=filename,
+                          mime="application/pdf")
+
